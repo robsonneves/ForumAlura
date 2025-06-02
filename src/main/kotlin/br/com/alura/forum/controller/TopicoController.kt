@@ -5,6 +5,8 @@ import br.com.alura.forum.dto.TopicoForm
 import br.com.alura.forum.dto.TopicoView
 import br.com.alura.forum.service.TopicoService
 import jakarta.validation.Valid
+import org.springframework.cache.annotation.CacheEvict
+import org.springframework.cache.annotation.Cacheable
 import org.springframework.data.domain.Page
 import org.springframework.data.domain.Pageable
 import org.springframework.http.HttpStatus
@@ -23,6 +25,13 @@ class TopicoController (private val service: TopicoService){
         return service.listar(nomeCurso, paginacao)
     }
 
+    @GetMapping("/cache")
+    @Cacheable("topicos")
+    fun listarCache(@RequestParam(required = false) nomeCurso: String?,
+               paginacao: Pageable): Page<TopicoView> {
+        return service.listar(nomeCurso, paginacao)
+    }
+
     @GetMapping("/{id}")
     fun buscarPorId(@PathVariable id: Long): TopicoView {
         return service.buscarPorId(id)
@@ -30,6 +39,7 @@ class TopicoController (private val service: TopicoService){
 
     @PostMapping
     @Transactional
+    @CacheEvict(value = ["topicos"], allEntries = true)
     fun cadastrar(@RequestBody @Valid topicoForm: TopicoForm, uriBuilder: UriComponentsBuilder): ResponseEntity<TopicoView> {
         val topicoView = service.cadastrar(topicoForm)
         val uri = uriBuilder.path("/topicos/${topicoView.id}").build().toUri()
@@ -38,6 +48,7 @@ class TopicoController (private val service: TopicoService){
 
     @PutMapping
     @Transactional
+    @CacheEvict(value = ["topicos"], allEntries = true)
     fun atualiza(@RequestBody @Valid topicoAtualizaForm: TopicoAtualizaForm): ResponseEntity<TopicoView> {
         val topicoView = service.atualizar(topicoAtualizaForm)
         return ResponseEntity.ok(topicoView)
@@ -46,6 +57,7 @@ class TopicoController (private val service: TopicoService){
     @DeleteMapping("/{id}")
     @ResponseStatus(HttpStatus.NO_CONTENT)
     @Transactional
+    @CacheEvict(value = ["topicos"], allEntries = true)
     fun deletar(@PathVariable id: Long){
         service.deletar(id)
     }
