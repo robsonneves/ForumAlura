@@ -8,4 +8,5 @@ Curso Alura, Rest API + Kotlin + Spring-Boot
 - Validation
 - Data JPA
 - DB H2
+- Hibernate
 - Flyway (migrations)
